@@ -11,8 +11,7 @@ The pipeline is orchestrated using **Apache Airflow**, allowing for easy schedul
 
 ## Key Features
 
-- **Parallelized Execution**: All steps (list files, transcribe, tokenize, store) run in parallel, leveraging Airflow's concurrency and task dependencies.
-- **Batch Processing**: Process audio files in batches to optimize performance, ensuring the pipeline handles large datasets efficiently.
+
 - **Error Handling & Logging**: In-depth logging for each stage of the pipeline, with retries and detailed error reports for transparency and debugging.
 - **Scalable Storage**: Uses **Cloudflare R2** for storage and **Parquet** for structured data storage, enabling easy scalability and querying of results.
 - **Tokenization and Transcription**: Utilizes **Whisper** for transcription and custom tokenization for further NLP tasks or model training.
@@ -95,7 +94,7 @@ The pipeline consists of three main tasks, each executed in sequence:
 
 ### 1. **List Audio Files**
 
-   This task interacts with Cloudflare R2 to list audio files available for processing. It retrieves the first batch of files (limited to `FILE_LIMIT`), which are then passed on for transcription.
+   This task interacts with Cloudflare R2 to list audio files available for processing.
 
 ### 2. **Transcribe Audio Files**
 
@@ -144,22 +143,3 @@ You can also set it to run on a schedule by modifying the `schedule_interval` in
 
 ---
 
-## Contributing
-
-Feel free to fork this project and contribute! Open a pull request for any improvements, bug fixes, or feature additions.
-
----
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## Contact
-
-For any questions or inquiries, please contact [your-email@example.com](mailto:your-email@example.com).
-
----
-
-### 🛠️ Built with ❤️ by [Your Name/Your Team]
