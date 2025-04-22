@@ -18,7 +18,6 @@ from src.schemas import AudioResult, PipelineSummary
 
 load_dotenv()
 logger = logging.getLogger(__name__)
-FILE_LIMIT = 2 # can be parameterized via Airflow Variable
 
 default_args = {
     'owner': 'airflow',
@@ -30,7 +29,7 @@ default_args = {
 dag = DAG(
     dag_id='audio_processing_pipeline_limited',
     default_args=default_args,
-    description='Pipeline to process 20 audio files from R2: transcribe, tokenize, store.',
+    description='Pipeline to process audio files from R2: transcribe, tokenize, store.',
     schedule_interval=None,
     catchup=False,
     tags=['audio', 'transcription', 'tokenization']
@@ -38,7 +37,7 @@ dag = DAG(
 
 def list_audio_files_task(**context):
     client = R2Client()
-    files = client.list_audio_files()[:FILE_LIMIT]
+    files = client.list_audio_files()
     if not files:
         logger.warning("No audio files found.")
         raise ValueError("No files available for processing")
