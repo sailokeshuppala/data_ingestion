@@ -1,0 +1,113 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    container_name: airflow_postgres
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  airflow-init:
+    build: .
+    container_name: airflow_init
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__FERNET_KEY: ${FERNET_KEY:-your_fernet_key_here}
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - ./shared_storage:/opt/airflow/shared_storage
+    command: >
+      bash -c "
+        airflow db init &&
+        airflow users create --username admin --firstname Admin --lastname User --role Admin --email admin@example.com --password admin
+      "
+
+  airflow-webserver:
+    build: .
+    container_name: airflow_webserver
+    restart: always
+    depends_on:
+      - airflow-init
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__FERNET_KEY: o6GgePATVoO3mKu7Qoh5MZTHmoc47SaB60mxbVYYShY=
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'false'
+
+      # Custom env vars
+      R2_BUCKET: mv-data-engineer-test
+      R2_ACCESS_KEY: cb5eb34e7737acb9296ff550121d1d6b
+      R2_SECRET_KEY: 2081f620ecea1cf0166389256f1ef2208865bb5349216faa2898b42fffe8a2d4
+      R2_ENDPOINT: https://bdadc4417ecd7714dd7d42a104a276c2.r2.cloudflarestorage.com
+
+      OUTPUT_DIR: /opt/airflow/shared_storage/results
+      SUMMARY_DIR: /opt/airflow/shared_storage/summary
+
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./dags/src:/opt/airflow/dags/src
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - ./.env:/opt/airflow/.env
+      - ./shared_storage:/opt/airflow/shared_storage
+      - ./wait-for-it.sh:/wait-for-it.sh
+    ports:
+      - "8080:8080"
+    command: >
+      bash -c "
+        /wait-for-it.sh postgres:5432 --timeout=60 --strict &&
+        airflow webserver
+      "
+
+  airflow-scheduler:
+    build: .
+    container_name: airflow_scheduler
+    restart: always
+    depends_on:
+      - airflow-init
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+
+      R2_BUCKET: mv-data-engineer-test
+      R2_ACCESS_KEY: cb5eb34e7737acb9296ff550121d1d6b
+      R2_SECRET_KEY: 2081f620ecea1cf0166389256f1ef2208865bb5349216faa2898b42fffe8a2d4
+      R2_ENDPOINT: https://bdadc4417ecd7714dd7d42a104a276c2.r2.cloudflarestorage.com
+
+      OUTPUT_DIR: /opt/airflow/shared_storage/results
+      SUMMARY_DIR: /opt/airflow/shared_storage/summary
+
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./dags/src:/opt/airflow/dags/src
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - ./.env:/opt/airflow/.env
+      - ./shared_storage:/opt/airflow/shared_storage
+      - ./wait-for-it.sh:/wait-for-it.sh
+    command: >
+      bash -c "
+        /wait-for-it.sh postgres:5432 --timeout=60 --strict &&
+        airflow scheduler
+      "
+
+volumes:
+  postgres_data:
+    driver: local
