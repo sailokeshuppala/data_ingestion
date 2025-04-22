@@ -52,10 +52,10 @@ services:
       AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'false'
 
       # Custom env vars
-      R2_BUCKET: mv-data-engineer-test
-      R2_ACCESS_KEY: cb5eb34e7737acb9296ff550121d1d6b
-      R2_SECRET_KEY: 2081f620ecea1cf0166389256f1ef2208865bb5349216faa2898b42fffe8a2d4
-      R2_ENDPOINT: https://bdadc4417ecd7714dd7d42a104a276c2.r2.cloudflarestorage.com
+      R2_BUCKET: {R2_BUCKET}
+      R2_ACCESS_KEY: {R2_acces_key}
+      R2_SECRET_KEY: {r2_secreat_key}
+      R2_ENDPOINT: {r2_endpoint}
 
       OUTPUT_DIR: /opt/airflow/shared_storage/results
       SUMMARY_DIR: /opt/airflow/shared_storage/summary
@@ -86,10 +86,10 @@ services:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
 
-      R2_BUCKET: mv-data-engineer-test
-      R2_ACCESS_KEY: cb5eb34e7737acb9296ff550121d1d6b
-      R2_SECRET_KEY: 2081f620ecea1cf0166389256f1ef2208865bb5349216faa2898b42fffe8a2d4
-      R2_ENDPOINT: https://bdadc4417ecd7714dd7d42a104a276c2.r2.cloudflarestorage.com
+      R2_BUCKET: {R2_BUCKET}
+      R2_ACCESS_KEY: {R2_acces_key}
+      R2_SECRET_KEY: {r2_secreat_key}
+      R2_ENDPOINT: {r2_endpoint}
 
       OUTPUT_DIR: /opt/airflow/shared_storage/results
       SUMMARY_DIR: /opt/airflow/shared_storage/summary
